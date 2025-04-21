@@ -77,3 +77,53 @@ INSERT INTO db1.orders VALUES
 ```sql
 SELECT * FROM db1.orders ORDER BY order_date LIMIT 10;
 ```
+
+### Примеры аналитических запросов:
+
+#### Статистика по статусам оплаты:
+```sql
+SELECT 
+    payment_status,
+    COUNT(*) as order_count,
+    SUM(total_amount) as total_sum,
+    AVG(total_amount) as avg_order
+FROM 
+    db1.orders
+GROUP BY 
+    payment_status;
+```
+
+#### Топ-5 пользователей по сумме заказов:
+```sql
+SELECT 
+    user_id,
+    SUM(total_amount) as total_spent,
+    COUNT(*) as order_count
+FROM 
+    db1.orders
+WHERE 
+    payment_status = 'paid'
+GROUP BY 
+    user_id
+ORDER BY 
+    total_spent DESC
+LIMIT 5;
+```
+
+#### Соединение с таблицей order_items:
+```sql
+SELECT 
+    o.order_id,
+    o.user_id,
+    o.total_amount,
+    COUNT(i.item_id) as items_count,
+    SUM(i.product_price * i.quantity) as calculated_total
+FROM 
+    db1.orders o
+JOIN 
+    db1.order_items i ON o.order_id = i.order_id
+GROUP BY 
+    o.order_id, o.user_id, o.total_amount
+ORDER BY 
+    o.order_id;
+```
